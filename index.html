@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Karyn juega una partida ♟️</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;width:100%;min-height:100%;font-family:Georgia,"Times New Roman",serif}
+body{background:radial-gradient(circle at center top,#4b3524 0%,#211711 55%,#100c09 100%);color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow:hidden}
+#app{width:100%;max-width:500px;min-height:100vh;padding:20px 14px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.intro{text-align:center;margin-bottom:12px;animation:aparecer .9s ease}
+.intro h1{font-size:24px;font-weight:normal;line-height:1.3;margin:0 0 7px}
+.intro p{font-size:15px;opacity:.78;margin:0}
+#progress{margin:9px 0 12px;font-size:12px;letter-spacing:1.8px;opacity:.68}
+#board{width:min(92vw,400px);height:min(92vw,400px);display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);border:7px solid #5b3a20;border-radius:5px;box-shadow:0 15px 45px rgba(0,0,0,.55),inset 0 0 0 2px rgba(255,255,255,.08);touch-action:none;user-select:none}
+.square{position:relative;display:flex;justify-content:center;align-items:center;font-size:clamp(31px,9vw,50px);cursor:pointer;touch-action:none}
+.light{background:#e5c99b}.dark{background:#795536}
+.square.selected{box-shadow:inset 0 0 0 5px rgba(255,215,80,.95)}
+.square.legal{box-shadow:inset 0 0 0 4px rgba(255,241,164,.75)}
+.square.legal::after{content:"";position:absolute;width:18%;height:18%;border-radius:50%;background:rgba(255,255,255,.78)}
+.square.capture{box-shadow:inset 0 0 0 4px rgba(255,205,120,.9)}
+.piece{position:relative;z-index:2;line-height:1;filter:drop-shadow(2px 3px 2px rgba(0,0,0,.45))}
+.white-piece{color:#fffdf4;text-shadow:0 1px 1px #4d3928,1px 0 1px #4d3928,-1px 0 1px #4d3928}
+.black-piece{color:#21170f;text-shadow:0 1px 1px rgba(255,255,255,.2)}
+#message{min-height:42px;margin-top:15px;text-align:center;font-size:15px;line-height:1.35;opacity:.9}
+#finalScreen{position:fixed;inset:0;z-index:20;display:none;justify-content:center;align-items:center;padding:25px;background:radial-gradient(circle at center,#60442d 0%,#211711 55%,#0c0907 100%);text-align:center}
+.final-content{animation:finalAparecer 1.5s ease}.final-chess{font-size:55px;margin-bottom:20px;animation:flotar 2s ease-in-out infinite}
+.final-text{font-size:clamp(30px,8vw,42px);line-height:1.25;margin:0}.final-subtext{margin-top:25px;font-size:19px;opacity:.85}.heart{display:inline-block;margin-top:18px;font-size:28px;animation:latido 1.5s infinite}
+@keyframes aparecer{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes finalAparecer{from{opacity:0;transform:scale(.88)}to{opacity:1;transform:scale(1)}}
+@keyframes flotar{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes latido{0%,100%{transform:scale(1)}50%{transform:scale(1.25)}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="intro">
+    <h1>Karyn juega esta partida para descubrir algo</h1>
+    <p>Elige cualquier pieza blanca y haz tu jugada.</p>
+  </div>
+  <div id="progress">TU JUGADA 1 DE 3</div>
+  <div id="board"></div>
+  <div id="message">Toca cualquier pieza blanca para comenzar.</div>
+  <div id="revealArea" style="display:none;text-align:center;margin-top:8px;">
+    <button id="revealButton" type="button"
+      style="border:1px solid rgba(255,255,255,.35);background:rgba(255,255,255,.10);color:white;padding:14px 22px;border-radius:28px;font-family:Georgia,'Times New Roman',serif;font-size:16px;cursor:pointer;min-height:48px;box-shadow:0 5px 18px rgba(0,0,0,.25);">
+      Pulsa para averiguar algo de mí
+    </button>
+  </div>
+</div>
+
+<div id="finalScreen">
+  <div class="final-content">
+    <div class="final-chess">♟️</div>
+    <p class="final-text">Me encanta tu sonrisa. 💛</p>
+    
+    <div class="heart">♡</div>
+  </div>
+</div>
+
+<script>
+const boardElement=document.getElementById("board");
+const progressElement=document.getElementById("progress");
+const messageElement=document.getElementById("message");
+const finalScreen=document.getElementById("finalScreen");
+const revealArea=document.getElementById("revealArea");
+const revealButton=document.getElementById("revealButton");
+const files=["a","b","c","d","e","f","g","h"];
+
+let board=[
+ ["r","n","b","q","k","b","n","r"],
+ ["p","p","p","p","p","p","p","p"],
+ ["","","","","","","",""],
+ ["","","","","","","",""],
+ ["","","","","","","",""],
+ ["","","","","","","",""],
+ ["P","P","P","P","P","P","P","P"],
+ ["R","N","B","Q","K","B","N","R"]
+];
+
+const symbols={P:"♙",R:"♖",N:"♘",B:"♗",Q:"♕",K:"♔",p:"♟",r:"♜",n:"♞",b:"♝",q:"♛",k:"♚"};
+let selected=null;
+let legalTargets=[];
+let whiteMoves=0;
+let busy=false;
+
+function color(piece){
+  if(!piece)return null;
+  return piece===piece.toUpperCase()?"w":"b";
+}
+function type(piece){return piece.toLowerCase()}
+function inside(r,c){return r>=0&&r<8&&c>=0&&c<8}
+function coord(r,c){return files[c]+(8-r)}
+function pos(s){return {r:8-parseInt(s[1]),c:files.indexOf(s[0])}}
+
+function addMove(list,fr,fc,tr,tc){
+  if(!inside(tr,tc))return false;
+  const target=board[tr][tc];
+  const movingColor=color(board[fr][fc]);
+  if(target&&color(target)===movingColor)return false;
+  list.push({fr,fc,tr,tc});
+  return !target;
+}
+
+function pseudoMoves(r,c){
+  const piece=board[r][c];
+  if(!piece)return [];
+  const result=[];
+  const col=color(piece);
+  const t=type(piece);
+  const dir=col==="w"?-1:1;
+  const startRow=col==="w"?6:1;
+
+  if(t==="p"){
+    const nr=r+dir;
+    if(inside(nr,c)&&!board[nr][c]){
+      result.push({fr:r,fc:c,tr:nr,tc:c});
+      const nr2=r+2*dir;
+      if(r===startRow&&!board[nr2][c])result.push({fr:r,fc:c,tr:nr2,tc:c});
+    }
+    for(const dc of [-1,1]){
+      const nc=c+dc;
+      if(inside(nr,nc)&&board[nr][nc]&&color(board[nr][nc])!==col)
+        result.push({fr:r,fc:c,tr:nr,tc:nc});
+    }
+  }
+
+  if(t==="n"){
+    [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]]
+      .forEach(([dr,dc])=>addMove(result,r,c,r+dr,c+dc));
+  }
+
+  if(t==="k"){
+    for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)
+      if(dr||dc)addMove(result,r,c,r+dr,c+dc);
+  }
+
+  if(["b","r","q"].includes(t)){
+    const dirs=[];
+    if(["b","q"].includes(t))dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);
+    if(["r","q"].includes(t))dirs.push([-1,0],[1,0],[0,-1],[0,1]);
+    for(const [dr,dc] of dirs){
+      let nr=r+dr,nc=c+dc;
+      while(inside(nr,nc)){
+        const empty=addMove(result,r,c,nr,nc);
+        if(!empty)break;
+        nr+=dr;nc+=dc;
+      }
+    }
+  }
+  return result;
+}
+
+function allMoves(side){
+  const result=[];
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    if(color(board[r][c])===side)result.push(...pseudoMoves(r,c));
+  }
+  return result;
+}
+
+function makeMove(m){
+  const piece=board[m.fr][m.fc];
+  board[m.tr][m.tc]=piece;
+  board[m.fr][m.fc]="";
+  if(piece==="P"&&m.tr===0)board[m.tr][m.tc]="Q";
+  if(piece==="p"&&m.tr===7)board[m.tr][m.tc]="q";
+}
+
+function render(){
+  boardElement.innerHTML="";
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const sq=document.createElement("div");
+    sq.className="square "+((r+c)%2===0?"light":"dark");
+    sq.dataset.coordinate=coord(r,c);
+    const legal=legalTargets.find(m=>m.tr===r&&m.tc===c);
+    if(selected&&selected.r===r&&selected.c===c)sq.classList.add("selected");
+    if(legal)sq.classList.add(board[r][c]?"capture":"legal");
+    const piece=board[r][c];
+    if(piece){
+      const span=document.createElement("span");
+      span.className="piece "+(color(piece)==="w"?"white-piece":"black-piece");
+      span.textContent=symbols[piece];
+      sq.appendChild(span);
+    }
+    sq.addEventListener("pointerdown",()=>tap(r,c));
+    boardElement.appendChild(sq);
+  }
+}
+
+function tap(r,c){
+  if(busy)return;
+  const piece=board[r][c];
+
+  if(selected){
+    const move=legalTargets.find(m=>m.tr===r&&m.tc===c);
+    if(move){
+      makeMove(move);
+      selected=null;
+      legalTargets=[];
+      whiteMoves++;
+      render();
+
+      if(whiteMoves>=3){
+        progressElement.textContent="TU TERCERA JUGADA";
+        messageElement.textContent="La partida continúa... ♟️";
+      }else{
+        progressElement.textContent=`TU JUGADA ${whiteMoves+1} DE 3`;
+        messageElement.textContent="Buena jugada. Mira lo que responde el tablero... ♟️";
+      }
+
+      busy=true;
+      setTimeout(blackResponse,650);
+      return;
+    }
+
+    if(color(piece)==="w"){selectPiece(r,c);return}
+    messageElement.textContent="Elige una de las casillas iluminadas ✨";
+    return;
+  }
+
+  if(color(piece)==="w")selectPiece(r,c);
+  else messageElement.textContent="Elige una pieza blanca para hacer tu jugada.";
+}
+
+function selectPiece(r,c){
+  selected={r,c};
+  legalTargets=pseudoMoves(r,c);
+  render();
+  if(legalTargets.length)messageElement.textContent="Ahora toca una de las casillas iluminadas ✨";
+  else{
+    messageElement.textContent="Esa pieza no tiene un movimiento disponible. Prueba con otra.";
+    selected=null;legalTargets=[];render();
+  }
+}
+
+function chooseBlackMove(){
+  const moves=allMoves("b");
+  if(!moves.length)return null;
+
+  const captures=moves.filter(m=>board[m.tr][m.tc]&&color(board[m.tr][m.tc])==="w");
+  if(captures.length){
+    const value={p:1,n:3,b:3,r:5,q:9,k:100};
+    captures.sort((a,b)=>(value[type(board[b.tr][b.tc])]||0)-(value[type(board[a.tr][a.tc])]||0));
+    return captures[0];
+  }
+
+  const preferred=[
+    ["e7","e5"],["d7","d5"],["g8","f6"],["b8","c6"],
+    ["f8","c5"],["f8","e7"],["c8","f5"],["c8","g4"]
+  ];
+
+  for(const [from,to] of preferred){
+    const f=pos(from),t=pos(to);
+    const candidate=moves.find(m=>m.fr===f.r&&m.fc===f.c&&m.tr===t.r&&m.tc===t.c);
+    if(candidate)return candidate;
+  }
+
+  const center=[[3,3],[3,4],[4,3],[4,4]];
+  moves.sort((a,b)=>{
+    const da=Math.min(...center.map(([r,c])=>Math.abs(a.tr-r)+Math.abs(a.tc-c)));
+    const db=Math.min(...center.map(([r,c])=>Math.abs(b.tr-r)+Math.abs(b.tc-c)));
+    return da-db;
+  });
+  return moves[0];
+}
+
+function blackResponse(){
+  const move=chooseBlackMove();
+  if(move)makeMove(move);
+  render();
+  busy=false;
+
+  if(whiteMoves>=3){
+    messageElement.textContent="Has completado tus tres jugadas. ♟️";
+    revealArea.style.display="block";
+    revealButton.focus({preventScroll:true});
+  }else{
+    messageElement.textContent="Tu turno. Elige cualquier pieza blanca. ♟️";
+  }
+}
+
+revealButton.addEventListener("click",()=>{
+  revealArea.style.display="none";
+  messageElement.textContent="";
+  finalScreen.style.display="flex";
+});
+
+render();
+</script>
+</body>
+</html>
