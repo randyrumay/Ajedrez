@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Para Karyn ♟️</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;width:100%;min-height:100%;font-family:Georgia,"Times New Roman",serif}
+body{color:#fff;background:radial-gradient(circle at 50% 15%,rgba(130,88,44,.55),transparent 35%),linear-gradient(160deg,#3a281d 0%,#17100c 65%,#0d0907 100%);overflow:hidden}
+button{font-family:inherit}.screen{width:100%;min-height:100vh;display:none;align-items:center;justify-content:center;padding:24px 18px;animation:fade .65s ease}.screen.active{display:flex}
+.card{width:min(100%,480px);text-align:center;padding:30px 22px}.cover-symbol{width:92px;height:92px;border-radius:50%;margin:0 auto 25px;display:flex;align-items:center;justify-content:center;background:rgba(255,214,125,.10);border:1px solid rgba(255,214,125,.28);box-shadow:0 0 35px rgba(255,190,90,.12);font-size:52px}
+h1{margin:0 auto 14px;font-size:31px;line-height:1.18;font-weight:normal}.subtitle{margin:0 auto;max-width:390px;color:rgba(255,255,255,.75);font-size:16px;line-height:1.55}.small-note{margin-top:20px;color:rgba(255,255,255,.45);font-size:12px;letter-spacing:1px}
+.primary{margin-top:28px;border:0;border-radius:999px;padding:15px 28px;min-width:190px;background:#e7bd70;color:#24170d;font-size:16px;font-weight:bold;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.25);transition:transform .15s ease}.primary:active{transform:scale(.96)}
+.instructions-title{font-size:25px;line-height:1.25;margin:0 0 12px;font-weight:normal}.objective{display:inline-block;margin:8px auto 18px;padding:11px 17px;border:1px solid rgba(231,189,112,.35);border-radius:14px;background:rgba(255,255,255,.045);font-size:16px;line-height:1.4}
+#gameScreen{padding:12px 10px}.game-wrap{width:min(100%,500px);text-align:center}.game-title{font-size:22px;margin:0 0 5px;font-weight:normal}.game-status{font-size:13px;color:rgba(255,255,255,.68);margin:0 0 10px;min-height:20px}#progress{font-size:12px;letter-spacing:1.6px;color:rgba(255,255,255,.55);margin:4px 0 10px}
+#board{width:min(92vw,430px);height:min(92vw,430px);max-width:430px;max-height:430px;margin:0 auto;display:grid;grid-template-columns:repeat(8,1fr);border:6px solid #9a6d3e;border-radius:8px;overflow:hidden;box-shadow:0 18px 40px rgba(0,0,0,.4);touch-action:manipulation}
+.square{aspect-ratio:1;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;user-select:none}.light{background:#e8d4b3}.dark{background:#8c633e}.piece{font-size:clamp(29px,8.6vw,47px);line-height:1;user-select:none;filter:drop-shadow(0 2px 1px rgba(0,0,0,.25))}.white-piece{color:#fff;text-shadow:0 1px 2px #000,0 0 1px #000}.black-piece{color:#16110d;text-shadow:0 1px 1px rgba(255,255,255,.3)}
+.selected::after{content:"";position:absolute;inset:5px;border:3px solid rgba(245,207,120,.95);border-radius:4px}.target::before{content:"";width:24%;height:24%;border-radius:50%;background:rgba(55,40,22,.42);position:absolute}.capture-target::before{content:"";position:absolute;inset:5px;border:4px solid rgba(180,72,58,.85);border-radius:50%;background:transparent}
+#gameMessage{min-height:22px;margin:10px auto 0;font-size:14px;color:rgba(255,255,255,.78)}#continueBtn{display:none;margin-top:13px}.success-text{font-size:18px;line-height:1.55;color:rgba(255,255,255,.83);margin:0 auto;max-width:390px}.question{font-size:25px;line-height:1.4;max-width:410px;margin:0 auto;font-weight:normal}.question em{font-style:normal;color:#e7bd70}.final-heart{font-size:58px;margin-bottom:20px;animation:pulse 1.5s ease-in-out infinite}.final-message{font-size:32px;line-height:1.25;margin:0;font-weight:normal}
+@keyframes fade{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+@media(max-height:700px){.screen{padding:14px}.card{padding:15px}.cover-symbol{width:68px;height:68px;font-size:40px;margin-bottom:15px}h1{font-size:27px}.primary{margin-top:18px}#board{width:min(82vh,410px);height:min(82vh,410px)}}
+
+
+/* Detalles visuales */
+body::before{
+  content:"";
+  position:fixed;inset:-30%;
+  background:radial-gradient(circle at 50% 45%,rgba(231,189,112,.07),transparent 28%);
+  animation:ambient 8s ease-in-out infinite alternate;
+  pointer-events:none;
+}
+.screen{position:relative}
+.card{
+  position:relative;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:28px;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.018));
+  box-shadow:0 25px 80px rgba(0,0,0,.28),inset 0 1px rgba(255,255,255,.06);
+  backdrop-filter:blur(8px);
+}
+.cover-symbol{
+  background:radial-gradient(circle,rgba(231,189,112,.16),rgba(231,189,112,.025) 68%);
+}
+.primary{
+  letter-spacing:.8px;
+  text-transform:uppercase;
+  position:relative;
+  overflow:hidden;
+}
+.primary::after{
+  content:"";
+  position:absolute;top:0;left:-100%;width:60%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);
+  transform:skewX(-20deg);
+  transition:left .55s ease;
+}
+.primary:hover::after{left:130%}
+.suspense-kicker{
+  color:#e7bd70;text-transform:uppercase;letter-spacing:3px;font-size:11px;
+  margin:0 0 15px;
+}
+.suspense-title{font-size:29px;margin-bottom:14px}
+@keyframes ambient{from{transform:scale(.95) translate(-1%,0)}to{transform:scale(1.08) translate(1%,2%)}}
+</style>
+</head>
+<body>
+<section id="coverScreen" class="screen active"><div class="card"><div class="cover-symbol">♟</div><h1>Karyn juega para descubrir más sobre mí</h1><p class="subtitle">Una pequeña partida. Tres movimientos. Y algo que quiero contarte.</p><button class="primary" onclick="showScreen('instructionsScreen')">CONTINUAR</button></div></section>
+<section id="instructionsScreen" class="screen"><div class="card"><div class="cover-symbol">♟️</div><h1 class="instructions-title">Una misión para ti</h1><div class="objective"><strong>En tres movimientos, logra capturar una pieza negra.</strong></div><p class="subtitle">Elige una pieza blanca, haz tu movimiento y deja que las negras respondan.</p><button class="primary" onclick="startGame()">JUGAR</button></div></section>
+<section id="gameScreen" class="screen"><div class="game-wrap"><h2 class="game-title">Tu pequeña partida</h2><p class="game-status" id="gameStatus">Elige una pieza blanca.</p><div id="progress">MOVIMIENTOS: 0 / 3 · CAPTURAS: 0</div><div id="board"></div><div id="gameMessage"></div><button id="continueBtn" class="primary" onclick="showScreen('successScreen')">GANASTE, PRESIONA PARA SEGUIR CONOCIÉNDOME</button></div></section>
+<section id="successScreen" class="screen"><div class="card"><div class="cover-symbol">✦</div><h1>Lo lograste</h1><p class="success-text">Ganaste la partida... pero todavía falta descubrir algo.</p><button class="primary" onclick="showScreen('suspenseScreen')">SEGUIR</button></div></section>
+<section id="suspenseScreen" class="screen"><div class="card suspense-card"><div class="cover-symbol">…</div><p class="suspense-kicker">Un último paso</p><h1 class="suspense-title">Has llegado hasta aquí...</h1><p class="subtitle">Y ahora estás a punto de descubrir algo que quizá no esperaba decirte.</p><button class="primary" onclick="showScreen('questionScreen')">CONTINUAR</button></div></section>
+<section id="questionScreen" class="screen"><div class="card"><div class="cover-symbol">♥</div><p class="question">Si estás segura de querer saber esto de mí, <em>presiona el botón.</em></p><button class="primary" onclick="showScreen('finalScreen')">QUIERO SABER</button></div></section>
+<section id="finalScreen" class="screen"><div class="card"><div class="final-heart">💛</div><p class="final-message">Me encanta tu sonrisa.</p></div></section>
+<script>
+const initialBoard=[["r","n","b","q","k","b","n","r"],["p","p","p","p","p","p","p","p"],["","","","","","","",""],["","","","","","","",""],["","","","","","","",""],["","","","","","","",""],["P","P","P","P","P","P","P","P"],["R","N","B","Q","K","B","N","R"]];
+const symbols={K:"♔",Q:"♕",R:"♖",B:"♗",N:"♘",P:"♙",k:"♚",q:"♛",r:"♜",b:"♝",n:"♞",p:"♟"};let board=[],selected=null,moves=0,captures=0,locked=false;
+function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
+function startGame(){board=initialBoard.map(r=>r.slice());selected=null;moves=0;captures=0;locked=false;document.getElementById("continueBtn").style.display="none";document.getElementById("gameMessage").textContent="";document.getElementById("gameStatus").textContent="Elige una pieza blanca.";renderBoard();showScreen("gameScreen")}
+function inside(r,c){return r>=0&&r<8&&c>=0&&c<8}function isWhite(p){return p&&p===p.toUpperCase()}function isBlack(p){return p&&p===p.toLowerCase()}
+function pseudoMoves(r,c){const p=board[r][c];if(!p||!isWhite(p))return[];const type=p.toUpperCase(),out=[];const add=(rr,cc)=>{if(!inside(rr,cc))return;if(board[rr][cc]&&isWhite(board[rr][cc]))return;out.push([rr,cc]);return !board[rr][cc]};if(type==="P"){if(inside(r-1,c)&&!board[r-1][c]){out.push([r-1,c]);if(r===6&&!board[4][c])out.push([4,c])}if(r>0&&c>0&&isBlack(board[r-1][c-1]))out.push([r-1,c-1]);if(r>0&&c<7&&isBlack(board[r-1][c+1]))out.push([r-1,c+1])}else if(type==="N"){[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>add(r+dr,c+dc))}else if(type==="K"){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)if(dr||dc)add(r+dr,c+dc)}else{const dirs=[];if(type==="B"||type==="Q")dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);if(type==="R"||type==="Q")dirs.push([-1,0],[1,0],[0,-1],[0,1]);dirs.forEach(([dr,dc])=>{let rr=r+dr,cc=c+dc;while(inside(rr,cc)){const t=board[rr][cc];if(t){if(isBlack(t))out.push([rr,cc]);break}out.push([rr,cc]);rr+=dr;cc+=dc}})}return out}
+function renderBoard(){const el=document.getElementById("board");el.innerHTML="";for(let r=0;r<8;r++)for(let c=0;c<8;c++){const sq=document.createElement("div");sq.className="square "+((r+c)%2===0?"light":"dark");const p=board[r][c];if(p){const span=document.createElement("span");span.className="piece "+(isWhite(p)?"white-piece":"black-piece");span.textContent=symbols[p];sq.appendChild(span)}if(selected&&selected[0]===r&&selected[1]===c)sq.classList.add("selected");if(selected){const possible=pseudoMoves(selected[0],selected[1]);if(possible.some(x=>x[0]===r&&x[1]===c)){if(p&&isBlack(p))sq.classList.add("capture-target");else sq.classList.add("target")}}sq.addEventListener("click",()=>handleSquare(r,c));el.appendChild(sq)}document.getElementById("progress").textContent=`MOVIMIENTOS: ${moves} / 3 · CAPTURAS: ${captures}`}
+function handleSquare(r,c){if(locked)return;const p=board[r][c];if(!selected){if(isWhite(p)){selected=[r,c];document.getElementById("gameStatus").textContent="Ahora elige dónde moverla.";renderBoard()}else document.getElementById("gameMessage").textContent="Elige una pieza blanca.";return}const legal=pseudoMoves(selected[0],selected[1]);if(!legal.some(x=>x[0]===r&&x[1]===c)){if(isWhite(p)){selected=[r,c];renderBoard();return}document.getElementById("gameMessage").textContent="Ese movimiento no está disponible.";return}const[sr,sc]=selected,moving=board[sr][sc],target=board[r][c];board[r][c]=moving;board[sr][sc]="";if(moving==="P"&&r===0)board[r][c]="Q";selected=null;moves++;if(target&&isBlack(target)){captures++;document.getElementById("gameMessage").textContent="¡Capturaste una pieza negra! ✨";renderBoard();finishGame();return}document.getElementById("gameStatus").textContent="Las negras están pensando...";renderBoard();setTimeout(blackResponse,520)}
+function blackMoves(){const list=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(isBlack(board[r][c])){const type=board[r][c].toUpperCase();const add=(rr,cc)=>{if(!inside(rr,cc))return;const t=board[rr][cc];if(t&&isBlack(t))return;list.push({from:[r,c],to:[rr,cc],capture:!!(t&&isWhite(t))})};if(type==="P"){if(inside(r+1,c)&&!board[r+1][c])add(r+1,c);if(r===1&&!board[2][c]&&!board[3][c])add(3,c);if(inside(r+1,c-1)&&isWhite(board[r+1][c-1]))add(r+1,c-1);if(inside(r+1,c+1)&&isWhite(board[r+1][c+1]))add(r+1,c+1)}else if(type==="N"){[[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dr,dc])=>add(r+dr,c+dc))}else if(type==="K"){for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)if(dr||dc)add(r+dr,c+dc)}else{const dirs=[];if(type==="B"||type==="Q")dirs.push([-1,-1],[-1,1],[1,-1],[1,1]);if(type==="R"||type==="Q")dirs.push([-1,0],[1,0],[0,-1],[0,1]);dirs.forEach(([dr,dc])=>{let rr=r+dr,cc=c+dc;while(inside(rr,cc)){const t=board[rr][cc];if(t){if(isWhite(t))add(rr,cc);break}add(rr,cc);rr+=dr;cc+=dc}})}}return list}
+function blackResponse(){if(moves>=3){ensureOpportunity();document.getElementById("gameStatus").textContent="Último movimiento. Busca tu oportunidad.";renderBoard();return}let list=blackMoves();if(!list.length){ensureOpportunity();renderBoard();return}let move=list.find(m=>m.capture)||null;if(!move){const preferred=[[[1,4],[3,4]],[[1,3],[3,3]],[[0,6],[2,5]],[[0,1],[2,2]],[[0,5],[3,2]],[[0,5],[2,4]]];for(const pref of preferred){move=list.find(m=>m.from[0]===pref[0][0]&&m.from[1]===pref[0][1]&&m.to[0]===pref[1][0]&&m.to[1]===pref[1][1]);if(move)break}}if(!move)move=list[Math.floor(Math.random()*list.length)];board[move.to[0]][move.to[1]]=board[move.from[0]][move.from[1]];board[move.from[0]][move.from[1]]="";if(moves===2)ensureOpportunity();document.getElementById("gameStatus").textContent=`Movimiento ${moves} de 3. Encuentra tu oportunidad.`;renderBoard()}
+function ensureOpportunity(){let hasCapture=false;for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(isWhite(board[r][c])&&pseudoMoves(r,c).some(([rr,cc])=>isBlack(board[rr][cc])))hasCapture=true;if(hasCapture)return;const candidates=[];for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(isWhite(board[r][c])){const type=board[r][c].toUpperCase(),attacks=[];if(type==="P"){if(r>0&&c>0)attacks.push([r-1,c-1]);if(r>0&&c<7)attacks.push([r-1,c+1])}else pseudoMoves(r,c).forEach(x=>attacks.push(x));for(const x of attacks)if(!board[x[0]][x[1]])candidates.push(x)}const empty=candidates[0];if(!empty)return;let blackPos=null;for(let r=0;r<8&&!blackPos;r++)for(let c=0;c<8;c++)if(isBlack(board[r][c])){blackPos=[r,c];break}if(blackPos){board[empty[0]][empty[1]]=board[blackPos[0]][blackPos[1]];board[blackPos[0]][blackPos[1]]=""}}
+function finishGame(){locked=true;document.getElementById("gameStatus").textContent="¡Lo lograste! 💛";document.getElementById("continueBtn").style.display="inline-block";document.getElementById("gameMessage").textContent="Ganaste. Ahora puedes seguir conociéndome."}
+</script>
+</body>
+</html>
